@@ -28,11 +28,20 @@ set(LIBNAME field_api)
 ecbuild_find_package(OpenMP COMPONENTS Fortran REQUIRED)
 
 ## find fypp
-find_program(FYPP fypp HINTS ${fypp_ROOT})
-if( NOT FYPP)
+ecbuild_find_package( fckit )
+find_program( FYPP fypp )
+
+if( fckit_FOUND AND fckit_HAVE_FCKIT_VENV )
+  set( FYPP ${FCKIT_VENV_EXE} -m fypp )
+elseif( fckit_FOUND )
+  # This is only needed for building in environments with python3 older than 3.8
+  list( APPEND _fckit_fypp_path "${FYPP}" )
+  list( LENGTH _fckit_fypp_path _list_length )
+  MATH( EXPR _last_entry "${_list_length} - 1" )
+  list( GET _fckit_fypp_path ${_last_entry} FYPP )
+elseif( FYPP MATCHES FYPP-NOTFOUND )
   include(cmake/field_api_fetchcontent_fypp.cmake)
   set(FYPP ${fypp_SOURCE_DIR}/bin/fypp)
-  set(fypp_ROOT ${fypp_SOURCE_DIR}/bin PARENT_SCOPE)
   ecbuild_info("fypp downloaded to: ${FYPP}")
 endif()
 
@@ -111,6 +120,9 @@ if(HAVE_BUDDY_MALLOC)
 endif()
 if(HAVE_CUDA)
   list( APPEND fypp_defines "-DCUDA")
+endif()
+if(fiat_FOUND)
+  list( APPEND fypp_defines "-DWITH_FIAT")
 endif()
 
 ## preprocess fypp files
