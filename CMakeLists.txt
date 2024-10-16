@@ -35,7 +35,7 @@ if( NOT FYPP)
   set(fypp_ROOT ${fypp_SOURCE_DIR}/bin PARENT_SCOPE)
   ecbuild_info("fypp downloaded to: ${FYPP}")
 endif()
-set( FYPP_PROG FYPP )
+set( FYPP_PROG ${FYPP} )
 
 ## find OpenACC
 ### Workaround for CMake bug (fixed in CMake 3.25)
